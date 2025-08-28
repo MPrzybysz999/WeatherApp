@@ -89,7 +89,9 @@ public class WeatherAppGUI extends JFrame {
         };
         
         for (Component c : weatherComponents) {
-            c.setAlignmentX(Component.CENTER_ALIGNMENT);
+            if (c instanceof JComponent) {
+                ((JComponent) c).setAlignmentX(Component.CENTER_ALIGNMENT);
+            }
             weatherPanel.add(c);
             weatherPanel.add(Box.createVerticalStrut(10));
         }
