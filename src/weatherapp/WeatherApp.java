@@ -22,7 +22,7 @@ public class WeatherApp {
 
         // Display countries and capitals
         System.out.println("All countries and capitals:");
-        for (CapitalRepository.CountryCapital cc : repo.getCountries()) {
+      for (CapitalRepository.CountryCapital cc : repo.getCountries()) {
             System.out.println(cc);
         }
 
