@@ -1,25 +1,32 @@
 package weatherapp;
-import  weatherapp.CapitalRepository;
 
 import javax.swing.SwingUtilities;
+import java.util.List;
 
-    public static void main(String[] args) {
-        // 1. Tworzymy repozytorium
-        CapitalRepository repo = new CapitalRepository();
+public class WeatherApp {
+    private CapitalRepository repo;
+    private WeatherAppGUI gui;
 
-        // 2. Sprawdzenie, czy repozytorium nie jest puste
+    public WeatherApp() {
+        // Initialize repository
+        repo = new CapitalRepository();
+        initializeData();
+    }
+
+    private void initializeData() {
+        // Check if repository is empty
         if (repo.getCountries() == null || repo.getCountries().isEmpty()) {
-            System.out.println("Brak danych w repozytorium. Sprawdź plik JSON.");
+            System.out.println("No data in repository. Check JSON file.");
             return;
         }
 
-        // 3. Wyświetlamy wszystkie kraje i stolice
-        System.out.println("Wszystkie kraje i stolice:");
+        // Display countries and capitals
+        System.out.println("All countries and capitals:");
         for (CapitalRepository.CountryCapital cc : repo.getCountries()) {
             System.out.println(cc);
         }
 
-        // 4. Wyszukujemy konkretny kraj (bez użycia Stream API)
+        // Search for specific country
         String countryToFind = "Polska";
         CapitalRepository.CountryCapital polska = null;
         for (CapitalRepository.CountryCapital cc : repo.getCountries()) {
@@ -30,16 +37,20 @@ import javax.swing.SwingUtilities;
         }
 
         if (polska != null) {
-            System.out.println("\nStolica " + countryToFind + ": " + polska.getCapitals());
+            System.out.println("\nCapital of " + countryToFind + ": " + polska.getCapitals());
         } else {
-            System.out.println("\nNie znaleziono kraju: " + countryToFind);
+            System.out.println("\nCountry not found: " + countryToFind);
         }
-public class WeatherApp {
+    }
+
+    private void startGUI() {
+        gui = new WeatherAppGUI();
+        gui.setVisible(true);
+    }
+
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            WeatherAppGUI gui = new WeatherAppGUI();
-            gui.setVisible(true);
-        });
+        WeatherApp app = new WeatherApp();
+        SwingUtilities.invokeLater(() -> app.startGUI());
     }
 }
 
