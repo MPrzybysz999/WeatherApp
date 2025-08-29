@@ -1,7 +1,7 @@
 package weatherapp;
 import  weatherapp.CapitalRepository;
 
-public class WeatherApp {
+import javax.swing.SwingUtilities;
 
     public static void main(String[] args) {
         // 1. Tworzymy repozytorium
@@ -34,6 +34,12 @@ public class WeatherApp {
         } else {
             System.out.println("\nNie znaleziono kraju: " + countryToFind);
         }
+public class WeatherApp {
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            WeatherAppGUI gui = new WeatherAppGUI();
+            gui.setVisible(true);
+        });
     }
 }
 
