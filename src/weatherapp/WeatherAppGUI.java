@@ -17,10 +17,15 @@ public class WeatherAppGUI extends JFrame {
     private JList<String> searchHistory;
     private DefaultListModel<String> historyModel;
     
+    private WeatherService weatherService;
+
     public WeatherAppGUI() {
         setupFrame();
         createComponents();
         layoutComponents();
+        
+        // Initialize WeatherService
+        weatherService = new WeatherService();
     }
     
     private void setupFrame() {
@@ -34,6 +39,9 @@ public class WeatherAppGUI extends JFrame {
         // Search components
         searchField = new JTextField(20);
         searchField.setToolTipText("Enter city name");
+        // Add Enter key listener
+        searchField.addActionListener(e -> handleSearch());
+        
         searchButton = new JButton("Search");
         searchButton.addActionListener(e -> handleSearch());
         
@@ -100,7 +108,7 @@ public class WeatherAppGUI extends JFrame {
         
         // Search history panel (right)
         JScrollPane historyScroll = new JScrollPane(searchHistory);
-        historyScroll.setBorder(BorderFactory.createTitledBorder("Search History"));
+        historyScroll.setBorder(BorderFactory.createTitledBorder("Historia wyszukiwania"));
         add(historyScroll, BorderLayout.EAST);
     }
     
@@ -109,19 +117,35 @@ public class WeatherAppGUI extends JFrame {
         if (!city.isEmpty()) {
             loadingIndicator.setVisible(true);
             messageLabel.setVisible(false);
-            // TODO: Implement weather API call
             historyModel.addElement(city);
             
-            // Simulated response (remove this when implementing actual API)
-            Timer timer = new Timer(1500, e -> {
-                loadingIndicator.setVisible(false);
-                cityLabel.setText(city);
-                temperatureLabel.setText("25°C");
-                descriptionLabel.setText("Sunny");
-                ((Timer)e.getSource()).stop();
-            });
-            timer.start();
+            // Use a separate thread for API call
+            new Thread(() -> {
+                try {
+                    String weatherInfo = weatherService.getWeatherForCity(city);
+                    SwingUtilities.invokeLater(() -> {
+                        loadingIndicator.setVisible(false);
+                        updateWeatherDisplay(weatherInfo);
+                    });
+                } catch (Exception e) {
+                    SwingUtilities.invokeLater(() -> {
+                        loadingIndicator.setVisible(false);
+                        messageLabel.setText("Error: Could not fetch weather data");
+                        messageLabel.setVisible(true);
+                    });
+                }
+            }).start();
         }
+    }
+    
+    private void updateWeatherDisplay(String weatherInfo) {
+        // Parse the weather info string (format: "City: XX°C, description")
+        String[] parts = weatherInfo.split(":");
+        String[] tempAndDesc = parts[1].split(",");
+        
+        cityLabel.setText(parts[0]);
+        temperatureLabel.setText(tempAndDesc[0].trim());
+        descriptionLabel.setText(tempAndDesc[1].trim());
     }
     
     public static void main(String[] args) {
