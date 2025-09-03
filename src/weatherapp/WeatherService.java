@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 public class WeatherService {
 
@@ -51,8 +53,11 @@ public class WeatherService {
 
     public String getWeatherForCity(String city) {
         try {
+            // URL encode the city name
+            String encodedCity = URLEncoder.encode(city, StandardCharsets.UTF_8.toString());
+            
             String urlString = "https://api.openweathermap.org/data/2.5/weather?q="
-                    + city + "&appid=" + apiKey + "&units=metric&lang=pl";
+                    + encodedCity + "&appid=" + apiKey + "&units=metric&lang=pl";
             URL url = new URL(urlString);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
@@ -71,12 +76,21 @@ public class WeatherService {
             // Extract main section
             String mainPart = json.split("\"main\":\\{")[1].split("\\}")[0];
             String temp = mainPart.split("\"temp\":")[1].split(",")[0];
+            String feelsLike = mainPart.split("\"feels_like\":")[1].split(",")[0];
+            String pressure = mainPart.split("\"pressure\":")[1].split(",")[0];
+            String humidity = mainPart.split("\"humidity\":")[1].split(",")[0];
 
             // Extract weather description
             String weatherPart = json.split("\"weather\":\\[")[1].split("\\]")[0];
             String description = weatherPart.split("\"description\":\"")[1].split("\"")[0];
 
-            return city + ": " + temp + "°C, " + description;
+            // Extract wind data
+            String windPart = json.split("\"wind\":\\{")[1].split("\\}")[0];
+            String windSpeed = windPart.split("\"speed\":")[1].split(",")[0];
+            String windDeg = windPart.split("\"deg\":")[1].split("}")[0];
+
+            return String.format("%s|%s|%s|%s|%s|%s|%s|%s", 
+                city, temp, description, pressure, humidity, feelsLike, windSpeed, windDeg);
 
         } catch (Exception e) {
             e.printStackTrace();

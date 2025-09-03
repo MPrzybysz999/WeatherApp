@@ -16,6 +16,10 @@ public class WeatherAppGUI extends JFrame {
     private JLabel messageLabel;
     private JList<String> searchHistory;
     private DefaultListModel<String> historyModel;
+    private JLabel pressureLabel;
+    private JLabel humidityLabel;
+    private JLabel feelsLikeLabel;
+    private JLabel windLabel;
     
     private WeatherService weatherService;
 
@@ -58,6 +62,18 @@ public class WeatherAppGUI extends JFrame {
         descriptionLabel = new JLabel();
         descriptionLabel.setFont(new Font("Arial", Font.PLAIN, 18));
         
+        pressureLabel = new JLabel();
+        pressureLabel.setFont(new Font("Arial", Font.PLAIN, 18));
+        
+        humidityLabel = new JLabel();
+        humidityLabel.setFont(new Font("Arial", Font.PLAIN, 18));
+        
+        feelsLikeLabel = new JLabel();
+        feelsLikeLabel.setFont(new Font("Arial", Font.PLAIN, 18));
+        
+        windLabel = new JLabel();
+        windLabel.setFont(new Font("Arial", Font.PLAIN, 18));
+        
         // Loading and message components
         loadingIndicator = new JProgressBar();
         loadingIndicator.setIndeterminate(true);
@@ -92,6 +108,10 @@ public class WeatherAppGUI extends JFrame {
             weatherIcon,
             temperatureLabel,
             descriptionLabel,
+            pressureLabel,
+            humidityLabel,
+            feelsLikeLabel,
+            windLabel,
             loadingIndicator,
             messageLabel
         };
@@ -139,13 +159,23 @@ public class WeatherAppGUI extends JFrame {
     }
     
     private void updateWeatherDisplay(String weatherInfo) {
-        // Parse the weather info string (format: "City: XX°C, description")
-        String[] parts = weatherInfo.split(":");
-        String[] tempAndDesc = parts[1].split(",");
-        
-        cityLabel.setText(parts[0]);
-        temperatureLabel.setText(tempAndDesc[0].trim());
-        descriptionLabel.setText(tempAndDesc[1].trim());
+        if (weatherInfo.startsWith("Error")) {
+            messageLabel.setText(weatherInfo);
+            messageLabel.setVisible(true);
+            return;
+        }
+
+        String[] parts = weatherInfo.split("\\|");
+        if (parts.length == 8) {
+            cityLabel.setText(parts[0]);
+            temperatureLabel.setText(String.format("%.1f°C", Double.parseDouble(parts[1])));
+            descriptionLabel.setText(parts[2]);
+            pressureLabel.setText(String.format("Ciśnienie: %s hPa", parts[3]));
+            humidityLabel.setText(String.format("Wilgotność: %s%%", parts[4]));
+            feelsLikeLabel.setText(String.format("Odczuwalna: %.1f°C", Double.parseDouble(parts[5])));
+            windLabel.setText(String.format("Wiatr: %.1f m/s, Kierunek: %s°", 
+                Double.parseDouble(parts[6]), parts[7]));
+        }
     }
     
     public static void main(String[] args) {
