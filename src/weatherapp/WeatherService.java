@@ -87,7 +87,11 @@ public class WeatherService {
             // Extract wind data
             String windPart = json.split("\"wind\":\\{")[1].split("\\}")[0];
             String windSpeed = windPart.split("\"speed\":")[1].split(",")[0];
-            String windDeg = windPart.split("\"deg\":")[1].split("}")[0];
+            // Fix wind degree parsing to handle cases when "gust" comes before "deg"
+            String windDeg = "0";
+            if (windPart.contains("\"deg\":")) {
+                windDeg = windPart.split("\"deg\":")[1].split("[,}]")[0];
+            }
 
             return String.format("%s|%s|%s|%s|%s|%s|%s|%s", 
                 city, temp, description, pressure, humidity, feelsLike, windSpeed, windDeg);

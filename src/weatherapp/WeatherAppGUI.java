@@ -46,7 +46,7 @@ public class WeatherAppGUI extends JFrame {
         // Add Enter key listener
         searchField.addActionListener(e -> handleSearch());
         
-        searchButton = new JButton("Search");
+        searchButton = new JButton("Wyszukaj");
         searchButton.addActionListener(e -> handleSearch());
         
         // Weather info components
@@ -158,6 +158,23 @@ public class WeatherAppGUI extends JFrame {
         }
     }
     
+    private String degreesToDirection(String degrees) {
+        try {
+            int deg = Integer.parseInt(degrees.trim());
+            if (deg >= 337.5 || deg < 22.5) return "północ";
+            if (deg >= 22.5 && deg < 67.5) return "północny wschód";
+            if (deg >= 67.5 && deg < 112.5) return "wschód";
+            if (deg >= 112.5 && deg < 157.5) return "południowy wschód";
+            if (deg >= 157.5 && deg < 202.5) return "południe";
+            if (deg >= 202.5 && deg < 247.5) return "południowy zachód";
+            if (deg >= 247.5 && deg < 292.5) return "zachód";
+            if (deg >= 292.5 && deg < 337.5) return "północny zachód";
+            return "nieznany";
+        } catch (NumberFormatException e) {
+            return "nieznany";
+        }
+    }
+
     private void updateWeatherDisplay(String weatherInfo) {
         if (weatherInfo.startsWith("Error")) {
             messageLabel.setText(weatherInfo);
@@ -173,8 +190,8 @@ public class WeatherAppGUI extends JFrame {
             pressureLabel.setText(String.format("Ciśnienie: %s hPa", parts[3]));
             humidityLabel.setText(String.format("Wilgotność: %s%%", parts[4]));
             feelsLikeLabel.setText(String.format("Odczuwalna: %.1f°C", Double.parseDouble(parts[5])));
-            windLabel.setText(String.format("Wiatr: %.1f m/s, Kierunek: %s°", 
-                Double.parseDouble(parts[6]), parts[7]));
+            windLabel.setText(String.format("Wiatr: %.1f m/s, Kierunek: %s", 
+                Double.parseDouble(parts[6]), degreesToDirection(parts[7])));
         }
     }
     
