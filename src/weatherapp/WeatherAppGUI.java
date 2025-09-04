@@ -35,7 +35,8 @@ public class WeatherAppGUI extends JFrame {
     private void setupFrame() {
         setTitle("Weather App");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(800, 600);
+        setMinimumSize(new Dimension(600, 400));  // Set minimum window size
+        setPreferredSize(new Dimension(800, 600));
         setLocationRelativeTo(null);
     }
     
@@ -86,23 +87,49 @@ public class WeatherAppGUI extends JFrame {
         historyModel = new DefaultListModel<>();
         searchHistory = new JList<>(historyModel);
         searchHistory.setPreferredSize(new Dimension(200, 0));
+        
+        // Center align all labels
+        cityLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        temperatureLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        descriptionLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        pressureLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        humidityLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        feelsLikeLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        windLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
     }
     
     private void layoutComponents() {
         setLayout(new BorderLayout(10, 10));
         
         // Search panel (top)
-        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JPanel searchPanel = new JPanel();
+        searchPanel.setLayout(new BoxLayout(searchPanel, BoxLayout.X_AXIS));
+        searchPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        searchField.setMaximumSize(new Dimension(Integer.MAX_VALUE, searchField.getPreferredSize().height));
         searchPanel.add(searchField);
+        searchPanel.add(Box.createRigidArea(new Dimension(10, 0)));
         searchPanel.add(searchButton);
         add(searchPanel, BorderLayout.NORTH);
         
         // Weather info panel (center)
-        JPanel weatherPanel = new JPanel();
-        weatherPanel.setLayout(new BoxLayout(weatherPanel, BoxLayout.Y_AXIS));
+        JPanel weatherPanel = new JPanel(new GridBagLayout());
         weatherPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         
-        // Add components to weather panel
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.weightx = 1.0;
+        
+        // Center align the panel contents
+        JPanel centeringPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints centerGbc = new GridBagConstraints();
+        centerGbc.gridwidth = GridBagConstraints.REMAINDER;
+        centerGbc.anchor = GridBagConstraints.CENTER;
+        centerGbc.insets = new Insets(5, 5, 5, 5);
+        
         Component[] weatherComponents = {
             cityLabel,
             weatherIcon,
@@ -117,19 +144,49 @@ public class WeatherAppGUI extends JFrame {
         };
         
         for (Component c : weatherComponents) {
-            if (c instanceof JComponent) {
-                ((JComponent) c).setAlignmentX(Component.CENTER_ALIGNMENT);
-            }
-            weatherPanel.add(c);
-            weatherPanel.add(Box.createVerticalStrut(10));
+            centeringPanel.add(c, centerGbc);
         }
         
-        add(weatherPanel, BorderLayout.CENTER);
+        // Add the centering panel to the weather panel
+        gbc.weighty = 1.0;
+        gbc.fill = GridBagConstraints.BOTH;
+        weatherPanel.add(centeringPanel, gbc);
+        
+        // Add glue to push components to top
+        gbc.weighty = 1.0;
+        gbc.fill = GridBagConstraints.BOTH;
+        weatherPanel.add(Box.createVerticalGlue(), gbc);
+        
+        // Wrap weatherPanel in a scroll pane
+        JScrollPane weatherScrollPane = new JScrollPane(weatherPanel);
+        weatherScrollPane.setBorder(null);
+        weatherScrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        add(weatherScrollPane, BorderLayout.CENTER);
         
         // Search history panel (right)
         JScrollPane historyScroll = new JScrollPane(searchHistory);
         historyScroll.setBorder(BorderFactory.createTitledBorder("Historia wyszukiwania"));
+        historyScroll.setPreferredSize(new Dimension(200, 0));
         add(historyScroll, BorderLayout.EAST);
+
+        // Add component listeners for dynamic font scaling
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentResized(java.awt.event.ComponentEvent evt) {
+                int width = getWidth();
+                int height = getHeight();
+                float fontScale = Math.min(width / 800f, height / 600f);
+                
+                cityLabel.setFont(new Font("Arial", Font.BOLD, (int)(24 * fontScale)));
+                temperatureLabel.setFont(new Font("Arial", Font.PLAIN, (int)(36 * fontScale)));
+                descriptionLabel.setFont(new Font("Arial", Font.PLAIN, (int)(18 * fontScale)));
+                pressureLabel.setFont(new Font("Arial", Font.PLAIN, (int)(18 * fontScale)));
+                humidityLabel.setFont(new Font("Arial", Font.PLAIN, (int)(18 * fontScale)));
+                feelsLikeLabel.setFont(new Font("Arial", Font.PLAIN, (int)(18 * fontScale)));
+                windLabel.setFont(new Font("Arial", Font.PLAIN, (int)(18 * fontScale)));
+            }
+        });
+
+        pack();
     }
     
     private void handleSearch() {
